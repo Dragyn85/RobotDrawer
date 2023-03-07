@@ -12,13 +12,13 @@ public class ConnectButton : MonoBehaviour
     [SerializeField] List<ValidateConnectionSetting> connectionsValidationComponents;
         [SerializeField] TMP_InputField iPInputField;
     [SerializeField] TMP_InputField portInputField;
-    [SerializeField] CoordinateReader coordinateReader;
+    [SerializeField] SendDataToRobot robotConnection;
     [SerializeField] ConnectionPrompt ConnectionPromt;
+    [SerializeField] CoordinateReader coordinateReader;
 
     public UnityEvent OnConnectedToRobot;
 
     
-
     Button button;
 
     private void OnEnable()
@@ -43,10 +43,11 @@ public class ConnectButton : MonoBehaviour
     }
     void Connect()
     {
-        coordinateReader.ConnectToRobot(iPInputField.text, portInputField.text, OnConnectionFinish);
+        robotConnection.ConnectToRobot(iPInputField.text, portInputField.text, OnConnectionFinish);
         ConnectionPromt.gameObject.SetActive(true);
         ConnectionPromt.SetText("Connecting to Robot, please wait!");
         ActivateButton(false);
+        coordinateReader.SetITakePosition(robotConnection);
     }
     void OnConnectionFinish(ConnectionResults result)
     {
