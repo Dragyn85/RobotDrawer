@@ -20,9 +20,13 @@ public class OutputToRapidModuleFile : ITakePositionData
     private string fullPath;
     int suffix;
 
-    public OutputToRapidModuleFile()
+    public OutputToRapidModuleFile(string path)
     {
         var directory = Application.persistentDataPath + "/";
+        if (Directory.Exists(path))
+        {
+            directory = path + "/";
+        }
         bool fileExists = true;
         int suffix = 1;
 
