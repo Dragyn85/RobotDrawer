@@ -15,18 +15,31 @@ public class CoordinateReader : MonoBehaviour
 
     [SerializeField] float _minDistance = 0.5f;
 
-    private bool connected;
-    private bool waitingForResponse;
+    private bool ready;
+
     Vector2 lastPos = new Vector2(-50, -50);
     
    
     public void SetITakePosition(ITakePositionData takePositionData)
     {
         positionReciverTarget = takePositionData;
+        StartCoroutine(AwaitMouseUp());
     }
+
+    private IEnumerator AwaitMouseUp()
+    {
+        while(!Input.GetMouseButtonUp(0))
+        {
+            yield return null;
+        }
+        yield return null;
+        ready= true;
+        
+    }
+
     private void Update()
     {
-        if(positionReciverTarget == null)
+        if(!ready && positionReciverTarget == null)
         {
             return;
         }
