@@ -543,6 +543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PaperSizeInMM: {x: 298, y: 210}
+  positionTransform: {fileID: 1891060626}
   _minDistance: 10
 --- !u!4 &129485285
 Transform:

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 
@@ -12,14 +13,14 @@ public class CoordinateReader : MonoBehaviour
     
     [SerializeField] Vector2 PaperSizeInMM;
     ITakePositionData positionReciverTarget;
+    [SerializeField] RectTransform positionTransform;
 
     [SerializeField] float _minDistance = 0.5f;
 
     private bool ready;
 
     Vector2 lastPos = new Vector2(-50, -50);
-    
-   
+
     public void SetITakePosition(ITakePositionData takePositionData)
     {
         positionReciverTarget = takePositionData;
@@ -36,6 +37,8 @@ public class CoordinateReader : MonoBehaviour
         ready= true;
         
     }
+
+    
 
     private void Update()
     {
@@ -81,7 +84,18 @@ public class CoordinateReader : MonoBehaviour
 
         }
 
+        //Get the mouseposition relative the positionTransform
+        Vector2 mousePos = Input.mousePosition;
+        Vector2 localPoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(positionTransform, mousePos, Camera.main, out localPoint);
+        
+        Debug.Log(localPoint);
+        //Calculate the localPoint in percentage
+        float x = (localPoint.x + positionTransform.rect.width / 2) / positionTransform.rect.width;
+        float y = (localPoint.y + positionTransform.rect.height / 2) / positionTransform.rect.height;
 
+        Vector2 panelPos = new Vector2(x, y);
+        Debug.Log(panelPos);
         
     }
     private void OnDestroy()
