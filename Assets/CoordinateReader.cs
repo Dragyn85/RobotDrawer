@@ -10,16 +10,17 @@ using UnityEngine;
 
 public class CoordinateReader : MonoBehaviour
 {
-    
     [SerializeField] Vector2 PaperSizeInMM;
     ITakePositionData positionReciverTarget;
     [SerializeField] RectTransform positionTransform;
+    [SerializeField] MousePositionWithinPanel mousePositionWithinPanel;
 
     [SerializeField] float _minDistance = 0.5f;
 
     private bool ready;
 
     Vector2 lastPos = new Vector2(-50, -50);
+    private Camera mainCamera;
 
     public void SetITakePosition(ITakePositionData takePositionData)
     {
@@ -27,80 +28,73 @@ public class CoordinateReader : MonoBehaviour
         StartCoroutine(AwaitMouseUp());
     }
 
+    private void Awake()
+    {
+        mainCamera = Camera.main;
+    }
+
     private IEnumerator AwaitMouseUp()
     {
-        while(!Input.GetMouseButtonUp(0))
+        while (!Input.GetMouseButtonUp(0))
         {
             yield return null;
         }
-        yield return null;
-        ready= true;
-        
-    }
 
-    
+        yield return null;
+        ready = true;
+    }
 
     private void Update()
     {
-        if(!ready && positionReciverTarget == null)
+        if (!ready && positionReciverTarget == null)
         {
             return;
         }
-        if (!positionReciverTarget.ReadyToRecieve)
-        {
-            return;
-        }
+
+        
 
         if (Input.GetMouseButtonDown(0))
         {
-            float posx = Input.mousePosition.x / Camera.main.pixelWidth;
-            float posy = Input.mousePosition.y / Camera.main.pixelHeight;
+            var paperpos = GetPaperPositionFromMousePositionInPanel();
             SetLastPos();
-            Vector2 paperpos = CaluclatePaperPos(posx, posy);
-
             positionReciverTarget.AddNewPositionData(new SendData(paperpos.x, paperpos.y, true, false));
-
         }
+
         if (Input.GetMouseButton(0))
-        {
-            if (Vector2.Distance(lastPos, Input.mousePosition) > _minDistance)
+        { 
+            var distance = Vector2.Distance(lastPos, Input.mousePosition);
+            if (distance > _minDistance)
             {
-                float posx = Input.mousePosition.x / Camera.main.pixelWidth;
-                float posy = Input.mousePosition.y / Camera.main.pixelHeight;
+                Vector2 paperpos = GetPaperPositionFromMousePositionInPanel();
                 SetLastPos();
-                Vector2 paperpos = CaluclatePaperPos(posx, posy);
 
                 positionReciverTarget.AddNewPositionData(new SendData(paperpos.x, paperpos.y, false, false));
             }
-
         }
+
         if (Input.GetMouseButtonUp(0))
         {
-            float posx = Input.mousePosition.x / Camera.main.pixelWidth;
-            float posy = Input.mousePosition.y / Camera.main.pixelHeight;
             SetLastPos();
-            Vector2 paperpos = CaluclatePaperPos(posx, posy);
+            Vector2 paperpos = GetPaperPositionFromMousePositionInPanel();
+
             positionReciverTarget.AddNewPositionData(new SendData(paperpos.x, paperpos.y, false, true));
-
         }
-
-        //Get the mouseposition relative the positionTransform
-        Vector2 mousePos = Input.mousePosition;
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(positionTransform, mousePos, Camera.main, out localPoint);
-        
-        Debug.Log(localPoint);
-        //Calculate the localPoint in percentage
-        float x = (localPoint.x + positionTransform.rect.width / 2) / positionTransform.rect.width;
-        float y = (localPoint.y + positionTransform.rect.height / 2) / positionTransform.rect.height;
-
-        Vector2 panelPos = new Vector2(x, y);
-        Debug.Log(panelPos);
         
     }
+
+    private Vector2 GetPaperPositionFromMousePositionInPanel()
+    {
+        var normalizedPosWithindDrawRect = mousePositionWithinPanel.GetNormalizedPosition(Input.mousePosition);
+
+        float posx = Mathf.Clamp(normalizedPosWithindDrawRect.x, 0, 1);
+        float posy = Mathf.Clamp(normalizedPosWithindDrawRect.y, 0, 1);
+        Vector2 paperpos = CaluclatePaperPos(posx, posy);
+        return paperpos;
+    }
+
     private void OnDestroy()
     {
-        if(positionReciverTarget != null)
+        if (positionReciverTarget != null)
             positionReciverTarget.EndProces();
     }
 
@@ -114,12 +108,14 @@ public class CoordinateReader : MonoBehaviour
         return new Vector2(posx * PaperSizeInMM.x, posy * PaperSizeInMM.y);
     }
 }
+
 public struct SendData
 {
     public float posx;
     public float posy;
     public bool beginDraw;
     public bool endDraw;
+
     public SendData(float x, float y, bool begin, bool end)
     {
         posx = x;
@@ -128,5 +124,3 @@ public struct SendData
         endDraw = end;
     }
 }
-
-

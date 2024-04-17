@@ -17,7 +17,6 @@ public class SendDataToRobot : MonoBehaviour, ITakePositionData
     private bool waitingForResponse;
     Queue<SendData> sendQueue = new Queue<SendData>();
     Action OnConnected;
-    
     public bool ReadyToRecieve => !waitingForResponse && connected;
 
     public void AddNewPositionData(SendData data)
@@ -30,10 +29,10 @@ public class SendDataToRobot : MonoBehaviour, ITakePositionData
         if (!connected)
             return;
 
-
         if (!waitingForResponse && sendQueue.Count > 0)
         {
             var data = sendQueue.Dequeue();
+            
             SendPosition(data.posx, data.posy, data.beginDraw, data.endDraw);
             GetResponsAsyncs();
         }
