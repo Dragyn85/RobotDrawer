@@ -10,8 +10,8 @@ public class SendDataToRobot : MonoBehaviour, ITakePositionData
 {
     Socket socket;
 
-    [SerializeField] string IP = "127.0.0.1";
-    [SerializeField] int portnumber = 1601;
+    [SerializeField] string IP = "192.168.1.100";
+    [SerializeField] int portnumber = 150;
 
     private bool connected;
     private bool waitingForResponse;
